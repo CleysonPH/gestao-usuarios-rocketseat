@@ -2,7 +2,6 @@ package api
 
 import (
 	"encoding/json"
-	"errors"
 	"net/http"
 	"strings"
 
@@ -37,30 +36,15 @@ func handleUpdateUserById(ur db.UserRepository) http.HandlerFunc {
 			return
 		}
 
-		if len(strings.TrimSpace(u.FirstName)) <= 0 {
-			sendJSON(w, response{Error: "please provide a first_name"}, http.StatusBadRequest)
-			return
-		}
-		if len(strings.TrimSpace(u.LastName)) <= 0 {
-			sendJSON(w, response{Error: "please provide a last_name"}, http.StatusBadRequest)
-			return
-		}
-		if len(strings.TrimSpace(u.Biography)) <= 0 {
-			sendJSON(w, response{Error: "please provide a biography"}, http.StatusBadRequest)
+		err := validateUserData(u)
+		if err != nil {
+			sendError(w, err)
 			return
 		}
 
 		user, err := ur.UpdateById(id, u)
 		if err != nil {
-			if errors.Is(err, db.ErrUserNotFound) {
-				sendJSON(w, response{Error: err.Error()}, http.StatusNotFound)
-				return
-			}
-			if errors.Is(err, db.ErrInvalidUUID) {
-				sendJSON(w, response{Error: err.Error()}, http.StatusBadRequest)
-				return
-			}
-			sendJSON(w, response{Error: err.Error()}, http.StatusInternalServerError)
+			sendError(w, err)
 			return
 		}
 
@@ -72,15 +56,7 @@ func handleDeleteUserById(ur db.UserRepository) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		id := chi.URLParam(r, "id")
 		if err := ur.DeleteById(id); err != nil {
-			if errors.Is(err, db.ErrUserNotFound) {
-				sendJSON(w, response{Error: err.Error()}, http.StatusNotFound)
-				return
-			}
-			if errors.Is(err, db.ErrInvalidUUID) {
-				sendJSON(w, response{Error: err.Error()}, http.StatusBadRequest)
-				return
-			}
-			sendJSON(w, response{Error: err.Error()}, http.StatusInternalServerError)
+			sendError(w, err)
 			return
 		}
 
@@ -94,15 +70,7 @@ func handleFindUserById(ur db.UserRepository) http.HandlerFunc {
 
 		user, err := ur.FindById(id)
 		if err != nil {
-			if errors.Is(err, db.ErrUserNotFound) {
-				sendJSON(w, response{Error: err.Error()}, http.StatusNotFound)
-				return
-			}
-			if errors.Is(err, db.ErrInvalidUUID) {
-				sendJSON(w, response{Error: err.Error()}, http.StatusBadRequest)
-				return
-			}
-			sendJSON(w, response{Error: err.Error()}, http.StatusInternalServerError)
+			sendError(w, err)
 			return
 		}
 
@@ -118,16 +86,9 @@ func handleInsertUser(ur db.UserRepository) http.HandlerFunc {
 			return
 		}
 
-		if len(strings.TrimSpace(u.FirstName)) <= 0 {
-			sendJSON(w, response{Error: "please provide a first_name"}, http.StatusBadRequest)
-			return
-		}
-		if len(strings.TrimSpace(u.LastName)) <= 0 {
-			sendJSON(w, response{Error: "please provide a last_name"}, http.StatusBadRequest)
-			return
-		}
-		if len(strings.TrimSpace(u.Biography)) <= 0 {
-			sendJSON(w, response{Error: "please provide a biography"}, http.StatusBadRequest)
+		err := validateUserData(u)
+		if err != nil {
+			sendError(w, err)
 			return
 		}
 
@@ -141,4 +102,17 @@ func handleFindAllUsers(ur db.UserRepository) http.HandlerFunc {
 		users := ur.FindAll()
 		sendJSON(w, response{Data: users}, http.StatusOK)
 	}
+}
+
+func validateUserData(u db.User) error {
+	if len(strings.TrimSpace(u.FirstName)) <= 0 {
+		return errEmptyFirstName
+	}
+	if len(strings.TrimSpace(u.LastName)) <= 0 {
+		return errEmptyLastName
+	}
+	if len(strings.TrimSpace(u.Biography)) <= 0 {
+		return errEmptyBiography
+	}
+	return nil
 }
