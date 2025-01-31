@@ -1,11 +1,14 @@
 package db
 
 import (
+	"sync"
+
 	"github.com/google/uuid"
 )
 
 type UserRepository struct {
 	data map[uuid.UUID]User
+	m    sync.Mutex
 }
 
 func NewUserRepository() UserRepository {
@@ -15,6 +18,9 @@ func NewUserRepository() UserRepository {
 }
 
 func (ur *UserRepository) FindAll() []User {
+	ur.m.Lock()
+	defer ur.m.Unlock()
+
 	users := make([]User, 0, len(ur.data))
 	for _, user := range ur.data {
 		users = append(users, user)
@@ -23,12 +29,18 @@ func (ur *UserRepository) FindAll() []User {
 }
 
 func (ur *UserRepository) Insert(u User) User {
+	ur.m.Lock()
+	defer ur.m.Unlock()
+
 	u.ID = uuid.New()
 	ur.data[u.ID] = u
 	return u
 }
 
 func (ur *UserRepository) FindById(id string) (User, error) {
+	ur.m.Lock()
+	defer ur.m.Unlock()
+
 	uuid, err := uuid.Parse(id)
 	if err != nil {
 		return User{}, ErrInvalidUUID
@@ -43,6 +55,9 @@ func (ur *UserRepository) FindById(id string) (User, error) {
 }
 
 func (ur *UserRepository) DeleteById(id string) error {
+	ur.m.Lock()
+	defer ur.m.Unlock()
+
 	uuid, err := uuid.Parse(id)
 	if err != nil {
 		return ErrInvalidUUID
@@ -58,6 +73,9 @@ func (ur *UserRepository) DeleteById(id string) error {
 }
 
 func (ur *UserRepository) UpdateById(id string, u User) (User, error) {
+	ur.m.Lock()
+	defer ur.m.Unlock()
+
 	uuid, err := uuid.Parse(id)
 	if err != nil {
 		return User{}, ErrInvalidUUID

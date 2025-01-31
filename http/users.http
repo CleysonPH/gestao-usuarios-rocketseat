@@ -13,15 +13,15 @@ Content-Type: application/json
 
 ###
 
-GET http://localhost:8080/api/users/7fb5a2bf-33bf-4da9-b73a-31052db659c6
+GET http://localhost:8080/api/users/e21f8f02-8588-4b46-8f33-2735105d8bcc
 
 ###
 
-DELETE http://localhost:8080/api/users/d51d3363-4c32-40cc-b4f7-e467c1c668bb
+DELETE http://localhost:8080/api/users/e21f8f02-8588-4b46-8f33-2735105d8bcc
 
 ###
 
-PUT http://localhost:8080/api/users/d9c75fcc-a0e0-4fee-a4df-e409b893ef5c
+PUT http://localhost:8080/api/users/e21f8f02-8588-4b46-8f33-2735105d8bcc
 Content-Type: application/json
 
 {
