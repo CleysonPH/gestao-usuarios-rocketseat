@@ -7,16 +7,8 @@ type UserRepository struct {
 }
 
 func NewUserRepository() UserRepository {
-	id := uuid.New()
 	return UserRepository{
-		data: map[uuid.UUID]User{
-			id: {
-				ID:        id,
-				FirstName: "Cleyson",
-				LastName:  "Lima",
-				Biography: "Test",
-			},
-		},
+		data: make(map[uuid.UUID]User),
 	}
 }
 
@@ -26,4 +18,10 @@ func (ur *UserRepository) FindAll() []User {
 		users = append(users, user)
 	}
 	return users
+}
+
+func (ur *UserRepository) Insert(u User) User {
+	u.ID = uuid.New()
+	ur.data[u.ID] = u
+	return u
 }
