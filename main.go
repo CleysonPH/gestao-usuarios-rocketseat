@@ -6,6 +6,7 @@ import (
 	"time"
 
 	"github.com/cleysonph/users-api/api"
+	"github.com/cleysonph/users-api/db"
 )
 
 func main() {
@@ -18,7 +19,9 @@ func main() {
 }
 
 func run() error {
-	handler := api.NewHandler()
+	ur := db.NewUserRepository()
+
+	handler := api.NewHandler(ur)
 
 	srv := http.Server{
 		Addr:         ":8080",

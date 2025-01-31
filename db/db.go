@@ -1,16 +1,26 @@
 package db
 
-type userRepository struct {
-	data map[Id]User
+import "github.com/google/uuid"
+
+type UserRepository struct {
+	data map[uuid.UUID]User
 }
 
-func NewUserRepository() userRepository {
-	return userRepository{
-		data: make(map[Id]User),
+func NewUserRepository() UserRepository {
+	id := uuid.New()
+	return UserRepository{
+		data: map[uuid.UUID]User{
+			id: {
+				ID:        id,
+				FirstName: "Cleyson",
+				LastName:  "Lima",
+				Biography: "Test",
+			},
+		},
 	}
 }
 
-func (ur *userRepository) FindAll() []User {
+func (ur *UserRepository) FindAll() []User {
 	users := make([]User, 0, len(ur.data))
 	for _, user := range ur.data {
 		users = append(users, user)
