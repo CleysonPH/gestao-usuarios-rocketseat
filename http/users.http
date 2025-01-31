@@ -6,7 +6,11 @@ POST http://localhost:8080/api/users
 Content-Type: application/json
 
 {
-    "first_name": "Cleyson",
-    "last_name": "Lima",
+    "first_name": "Amauri",
+    "last_name": "Blanco",
     "biography": "Teste"
 }
+
+###
+
+GET http://localhost:8080/api/users/d32c019c-710a-4535-8736-07fc0a48a549

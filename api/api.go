@@ -2,6 +2,7 @@ package api
 
 import (
 	"encoding/json"
+	"errors"
 	"net/http"
 	"strings"
 
@@ -19,8 +20,27 @@ func NewHandler(ur db.UserRepository) http.Handler {
 
 	r.Get("/api/users", handleFindAllUsers(ur))
 	r.Post("/api/users", handleInsertUser(ur))
+	r.Get("/api/users/{id}", handleFindUserById(ur))
 
 	return r
+}
+
+func handleFindUserById(ur db.UserRepository) http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		id := chi.URLParam(r, "id")
+
+		user, err := ur.FindById(id)
+		if err != nil {
+			if errors.Is(err, db.ErrUserNotFound) {
+				sendJSON(w, response{Error: err.Error()}, http.StatusNotFound)
+				return
+			}
+			sendJSON(w, response{Error: err.Error()}, http.StatusInternalServerError)
+			return
+		}
+
+		sendJSON(w, response{Data: user}, http.StatusOK)
+	}
 }
 
 func handleInsertUser(ur db.UserRepository) http.HandlerFunc {
