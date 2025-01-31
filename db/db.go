@@ -56,3 +56,23 @@ func (ur *UserRepository) DeleteById(id string) error {
 	delete(ur.data, uuid)
 	return nil
 }
+
+func (ur *UserRepository) UpdateById(id string, u User) (User, error) {
+	uuid, err := uuid.Parse(id)
+	if err != nil {
+		return User{}, ErrInvalidUUID
+	}
+
+	user, ok := ur.data[uuid]
+	if !ok {
+		return User{}, ErrUserNotFound
+	}
+
+	user.FirstName = u.FirstName
+	user.LastName = u.LastName
+	user.Biography = u.Biography
+
+	ur.data[uuid] = user
+
+	return user, nil
+}

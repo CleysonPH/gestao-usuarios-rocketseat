@@ -18,3 +18,14 @@ GET http://localhost:8080/api/users/d32c019c-710a-4535-8736-07fc0a48a549
 ###
 
 DELETE http://localhost:8080/api/users/d51d3363-4c32-40cc-b4f7-e467c1c668bb
+
+###
+
+PUT http://localhost:8080/api/users/a6bba4af-2c66-4a25-8c40-a3e97ef51334
+Content-Type: application/json
+
+{
+    "first_name": "Elton",
+    "last_name": "Blanco",
+    "biography": "Updated"
+}

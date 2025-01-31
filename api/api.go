@@ -22,8 +22,50 @@ func NewHandler(ur db.UserRepository) http.Handler {
 	r.Post("/api/users", handleInsertUser(ur))
 	r.Get("/api/users/{id}", handleFindUserById(ur))
 	r.Delete("/api/users/{id}", handleDeleteUserById(ur))
+	r.Put("/api/users/{id}", handleUpdateUserById(ur))
 
 	return r
+}
+
+func handleUpdateUserById(ur db.UserRepository) http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		id := chi.URLParam(r, "id")
+
+		var u db.User
+		if err := json.NewDecoder(r.Body).Decode(&u); err != nil {
+			sendJSON(w, response{Error: "invalid body"}, http.StatusUnprocessableEntity)
+			return
+		}
+
+		if len(strings.TrimSpace(u.FirstName)) <= 0 {
+			sendJSON(w, response{Error: "please provide a first_name"}, http.StatusBadRequest)
+			return
+		}
+		if len(strings.TrimSpace(u.LastName)) <= 0 {
+			sendJSON(w, response{Error: "please provide a last_name"}, http.StatusBadRequest)
+			return
+		}
+		if len(strings.TrimSpace(u.Biography)) <= 0 {
+			sendJSON(w, response{Error: "please provide a biography"}, http.StatusBadRequest)
+			return
+		}
+
+		user, err := ur.UpdateById(id, u)
+		if err != nil {
+			if errors.Is(err, db.ErrUserNotFound) {
+				sendJSON(w, response{Error: err.Error()}, http.StatusNotFound)
+				return
+			}
+			if errors.Is(err, db.ErrInvalidUUID) {
+				sendJSON(w, response{Error: err.Error()}, http.StatusBadRequest)
+				return
+			}
+			sendJSON(w, response{Error: err.Error()}, http.StatusInternalServerError)
+			return
+		}
+
+		sendJSON(w, response{Data: user}, http.StatusCreated)
+	}
 }
 
 func handleDeleteUserById(ur db.UserRepository) http.HandlerFunc {
